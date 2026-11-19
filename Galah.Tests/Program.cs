@@ -26,6 +26,7 @@ internal static class Program
     {
         try { Console.OutputEncoding = Encoding.UTF8; } catch (IOException) { /* redirected: keep defaults */ }
 
+        _filter = Environment.GetEnvironmentVariable("TEST_FILTER");
         _root = MakeScratchRoot();
         Console.WriteLine("Galah.Tests — quality gate suite");
         Console.WriteLine("  data root : " + _root);
@@ -529,8 +530,15 @@ internal static class Program
     }
 
     // ─────────────────────────────── harness ───────────────────────────────
+    private static string? _filter;
+
+    private static bool Wanted(string tag) =>
+        _filter is null || _filter.Split(',').Contains(tag.Trim(), StringComparer.Ordinal);
+
     private static void Run(string tag, Action body)
     {
+        if (!Wanted(tag)) return;
+        Console.Error.WriteLine(">>> " + tag + " start");
         try
         {
             body();
@@ -542,6 +550,7 @@ internal static class Program
             if (ex.InnerException is not null)
                 Console.WriteLine($"      inner: {ex.InnerException.GetType().Name}: {ex.InnerException.Message}");
         }
+        Console.Error.WriteLine(">>> " + tag + " done");
         Console.WriteLine();
     }
 

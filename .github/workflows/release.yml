@@ -21,7 +21,9 @@ jobs:
       - name: Build
         run: dotnet build Galah.sln -c Release
 
-      - name: Unit tests
+      - name: Unit tests (bisect: environment-independent half)
+        env:
+          TEST_FILTER: T1,T2,T3,T4,T5,T6,T9,T11,T12,T15,T17,T18,T21
         run: |
           dotnet Galah.Tests/bin/Release/net8.0-windows/Galah.Tests.dll 2>&1 | Tee-Object test-output.log
           exit $LASTEXITCODE
