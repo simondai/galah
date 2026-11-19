@@ -107,6 +107,8 @@
                      ItemsSource="{Binding Items}" SelectedItem="{Binding SelectedItem}"
                      MouseDoubleClick="SeedList_MouseDoubleClick"
                      ItemContainerStyle="{StaticResource SeedItem}"
+                     Background="{DynamicResource Galah.Input.Background}"
+                     Foreground="{DynamicResource Galah.Text.Primary}"
                      BorderBrush="{DynamicResource Galah.Input.Border}" BorderThickness="1"
                      ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                 <ListBox.ItemTemplate>
