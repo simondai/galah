@@ -184,21 +184,27 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
-        <Style TargetType="{x:Type Separator}">
-            <!-- Kill every inherited margin/padding from theme-level styles (they made the line
-                 asymmetric inside the popup), then draw a hairline that stretches edge to edge
-                 with symmetric breathing room matching the leaf items' horizontal padding. -->
+                <!-- Hairline. Menus do NOT pick up an implicit Separator style: a separator inside a
+             Menu/ContextMenu is looked up by the MenuItem.SeparatorStyleKey resource key, so
+             without that key the theme's own light separator survives every theme swap
+             (which is why the line kept sitting right-of-centre no matter what the implicit
+             style said). Both keys point at one look: symmetric 10px insets, matching the
+             leaf items' text padding. -->
+        <Style x:Key="Galah.MenuSeparator" TargetType="Separator">
             <Setter Property="Margin" Value="0" />
             <Setter Property="Padding" Value="0" />
             <Setter Property="HorizontalAlignment" Value="Stretch" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Separator">
-                        <Border Height="1" Background="{DynamicResource Galah.Separator}"
-                                Margin="10,4" HorizontalAlignment="Stretch" />
+                        <Border Height="1" Margin="10,5" Background="{DynamicResource Galah.Separator}"
+                                HorizontalAlignment="Stretch" />
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
+        <Style x:Key="{x:Static MenuItem.SeparatorStyleKey}" TargetType="Separator"
+               BasedOn="{StaticResource Galah.MenuSeparator}" />
+        <Style TargetType="{x:Type Separator}" BasedOn="{StaticResource Galah.MenuSeparator}" />
     </Application.Resources>
 </Application>
