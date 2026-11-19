@@ -22,10 +22,7 @@ jobs:
         run: dotnet build Galah.sln -c Release
 
       - name: Unit tests
-        run: |
-          dotnet Galah.Tests/bin/Release/net8.0-windows/Galah.Tests.dll 2>&1 | Tee-Object test-output.log
-          Get-Content test-output.log | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
-          exit $LASTEXITCODE
+        run: dotnet Galah.Tests/bin/Release/net8.0-windows/Galah.Tests.dll
 
       - name: Upload test log (always, even on failure)
         if: always()
