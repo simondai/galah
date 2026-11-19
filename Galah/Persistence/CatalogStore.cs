@@ -149,7 +149,7 @@ public sealed class CatalogStore
         var before = tab.Items.OrderBy(i => i.Order).ThenBy(i => i.Id, StringComparer.Ordinal)
             .Select(i => i.Id).ToList();
         var sorted = tab.Items
-            .OrderBy(i => i.Name, StringComparer.Create(System.Globalization.CultureInfo.CurrentCulture, ignoreCase: true))
+            .OrderBy(i => i.Name, Galah.Services.NameOrder.Sort)
             .ThenBy(i => i.Id, StringComparer.Ordinal)
             .ToList();
         var changed = 0;

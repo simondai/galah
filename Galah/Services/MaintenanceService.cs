@@ -58,7 +58,7 @@ public static class MaintenanceService
 
             var names = ordered.Select(i => i.Name).ToList();
             var sortedNames = names
-                .OrderBy(n => n, StringComparer.Create(System.Globalization.CultureInfo.CurrentCulture, ignoreCase: true))
+                .OrderBy(n => n, NameOrder.Sort)
                 .ToList();
             if (!names.SequenceEqual(sortedNames, StringComparer.Ordinal))
                 unsorted.Add(tab.Name);
