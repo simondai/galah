@@ -117,12 +117,16 @@ public static class IconService
         }
     }
 
-    /// <summary>Cache key: sha1 of the normalized source path plus the icon index (task I).</summary>
+    /// <summary>
+    /// Cache key: sha1 of the format salt + normalized source path + icon index (task I). The
+    /// <c>v2</c> salt retires entries written before the shell icon handler existed — stale
+    /// modern-.msc entries hold the gray generic document icon and must re-extract, not hit.
+    /// </summary>
     /// <param name="storedSource">Stored path.</param>
     /// <param name="index">Icon index.</param>
     public static string CacheKey(string storedSource, int index)
     {
-        var payload = PathNorm.ToStored(storedSource).ToLowerInvariant() + "|" + index.ToString(CultureInfo.InvariantCulture);
+        var payload = "v2|" + PathNorm.ToStored(storedSource).ToLowerInvariant() + "|" + index.ToString(CultureInfo.InvariantCulture);
         var bytes = SHA1.HashData(Encoding.UTF8.GetBytes(payload));
         return Convert.ToHexString(bytes).ToLowerInvariant();
     }

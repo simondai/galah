@@ -35,6 +35,8 @@
     <SolidColorBrush x:Key="Galah.Hairline" Color="#FFE0E0E0" />
     <SolidColorBrush x:Key="Galah.DividerSoft" Color="#FFF0F0F0" />
 
+    <SolidColorBrush x:Key="Galah.Popup.Background" Color="#FFFFFFFF" />
+
     <SolidColorBrush x:Key="Galah.Panel.Translucent" Color="#E8F5F5F7" />
 
 </ResourceDictionary>

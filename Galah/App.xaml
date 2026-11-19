@@ -71,5 +71,58 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        <!-- Menu language: WPF's default ContextMenu/MenuItem templates read SystemColors, so
+             popups stay light even in dark mode. These implicit styles re-skin every menu through
+             the theme dictionaries (DynamicResource, so a ThemeService swap re-colors live).
+             Kept inline (no Source) so the swap never removes them. -->
+        <Style TargetType="ContextMenu">
+            <Setter Property="Background" Value="{DynamicResource Galah.Popup.Background}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource Galah.Panel.Border}" />
+            <Setter Property="Foreground" Value="{DynamicResource Galah.Text.Primary}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ContextMenu">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1"
+                                CornerRadius="10" Padding="6" Margin="8">
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="12" ShadowDepth="2" Opacity="0.35" />
+                            </Border.Effect>
+                            <ItemsPresenter />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style TargetType="MenuItem">
+            <Setter Property="Foreground" Value="{DynamicResource Galah.Text.Primary}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="MenuItem">
+                        <Border x:Name="bg" Background="Transparent" CornerRadius="6" Padding="10,6">
+                            <ContentPresenter ContentSource="Header" VerticalAlignment="Center"
+                                              TextBlock.Foreground="{TemplateBinding Foreground}" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsHighlighted" Value="True">
+                                <Setter TargetName="bg" Property="Background" Value="{DynamicResource Galah.Tile.Hover}" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Foreground" Value="{DynamicResource Galah.Text.Secondary}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style TargetType="{x:Type Separator}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Separator">
+                        <Border Height="1" Background="{DynamicResource Galah.Separator}" Margin="6,4" />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Application.Resources>
 </Application>
