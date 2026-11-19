@@ -16,6 +16,7 @@ public sealed partial class PromptWindow : Window
     {
         InitializeComponent();
         Title = title;
+        TitleText.Text = title;
         MessageText.Text = message;
         if (initial is not null)
         {
@@ -79,6 +80,13 @@ public sealed partial class PromptWindow : Window
                 window.Activate();
             }
         };
+    }
+
+    /// <summary>Drag the borderless dialog by its chrome (matches the panel behaviour).</summary>
+    private void Window_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        if (e.ButtonState == System.Windows.Input.MouseButtonState.Pressed)
+            DragMove();
     }
 
     private void Ok_Click(object sender, RoutedEventArgs e)

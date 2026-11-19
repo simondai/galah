@@ -103,9 +103,31 @@ dotnet run --project Galah.Acceptance -c Release -- <GalahData 目录>   # 25 �
 - Windows 10 1709+ / Windows 11(x64)
 - 运行时自包含,无需安装 .NET
 
-## 名字
+## 二次开发
+
+### 开发环境
+
+- [Visual Studio 2022](https://visualstudio.microsoft.com/)(或任意顺手的 C# IDE / VS Code)
+- **.NET SDK 8.0+**,安装时勾选 **“.NET 桌面开发”** 工作负载(WPF 依赖)
+- Git
+
+克隆后两条命令验证环境:
+
+    dotnet build Galah.sln
+    dotnet run --project Galah.Tests
+
+### 本项目的开发工具链
+
+- **Alma**(AI 结对编程):需求拆解、实现、测试与调试的主力
+- **Git + GitHub Actions**:版本管理;CI 自动构建/测试/发布(打 v* tag 即出 Release)
+- **dotnet CLI**:构建、测试、单文件发布,不依赖 IDE
+- **PowerShell + UI Automation**:进程级验收脚本与诊断
+
+## 名字与致敬
 
 Galah(凤头鹦鹉)是作者家的宠物。粉红凤头鹦鹉聪明、话多、精力旺盛——大概也是一个好启动器的样子。
+
+本项目致敬 [Rolan](https://getrolan.com/) 的作者。作者本人是 Rolan 2 近十年的老用户;Galah 的功能原型参考自 Rolan,但全部代码从零实现,不含任何 Rolan 的代码、图标或素材。
 
 ## 许可
 

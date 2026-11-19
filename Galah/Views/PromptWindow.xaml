@@ -3,27 +3,78 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="提示"
         Width="400" SizeToContent="Height" MinHeight="120"
-        WindowStyle="SingleBorderWindow" ResizeMode="NoResize"
+        WindowStyle="None" ResizeMode="NoResize" AllowsTransparency="True"
         ShowInTaskbar="False" WindowStartupLocation="CenterOwner"
         FontFamily="Segoe UI Variable Text, Segoe UI, Microsoft YaHei UI, system-ui, sans-serif" FontSize="12.5"
-        Icon="{DynamicResource Galah.WindowIcon}" Background="{DynamicResource Galah.Panel.Background}"
-        KeyDown="Window_KeyDown">
+        Icon="{DynamicResource Galah.WindowIcon}" Background="Transparent"
+        KeyDown="Window_KeyDown" MouseLeftButtonDown="Window_MouseLeftButtonDown">
 
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
     </Window.Resources>
 
-    <StackPanel Margin="16,14,16,14">
-        <TextBlock x:Name="MessageText" TextWrapping="Wrap" Foreground="{DynamicResource Galah.Text.Primary}" />
-        <TextBox x:Name="InputBox" Margin="0,12,0,0" Padding="4,3" Visibility="Collapsed"
-                 Background="{DynamicResource Galah.Input.Background}"
-                 Foreground="{DynamicResource Galah.Text.Primary}"
-                 BorderBrush="{DynamicResource Galah.Input.Border}" />
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
-            <!-- 中文界面习惯：动作按钮在左，取消在右（用户规范 2026-11-18） -->
-                        <Button x:Name="OkButton" Content="确定" MinWidth="84" Padding="18,10" Margin="0,0,8,0"
-                    IsDefault="True" Click="Ok_Click" Style="{StaticResource Galah.ButtonPrimary}" />
-                        <Button Content="取消" MinWidth="74" Padding="14,8" Click="Cancel_Click" />
-        </StackPanel>
-    </StackPanel>
+    <!-- Borderless chrome matching the panel: 18px corners, hairline border, parchment canvas.
+         DESIGN.md: no shadows on chrome, the surface change is the divider. -->
+    <Border CornerRadius="18" BorderThickness="1"
+            BorderBrush="{DynamicResource Galah.Panel.Border}"
+            Background="{DynamicResource Galah.Panel.Background}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!-- custom chrome: icon + title + circular close -->
+            <Grid Grid.Row="0" Margin="16,12,10,0" Background="Transparent">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Image Grid.Column="0" Source="{DynamicResource Galah.WindowIcon}" Width="18" Height="18"
+                       VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality" />
+                <TextBlock x:Name="TitleText" Grid.Column="1" Margin="8,0,0,0" VerticalAlignment="Center"
+                           FontSize="13" FontWeight="SemiBold"
+                           Foreground="{DynamicResource Galah.Text.Primary}" />
+                <Button x:Name="CloseButton" Grid.Column="2" Content="✕" Width="28" Height="28"
+                        Padding="0" FontSize="12" Cursor="Hand" Click="Cancel_Click"
+                        Background="Transparent" BorderThickness="0"
+                        Foreground="{DynamicResource Galah.Text.Secondary}"
+                        AutomationProperties.Name="关闭">
+                    <Button.Style>
+                        <Style TargetType="Button" />
+                    </Button.Style>
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="chip" Background="Transparent" CornerRadius="14">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="chip" Property="Background" Value="#26D2D2D7" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+            </Grid>
+
+            <!-- body -->
+            <StackPanel Grid.Row="1" Margin="18,10,18,16">
+                <TextBlock x:Name="MessageText" TextWrapping="Wrap" FontSize="13"
+                           LineHeight="20"
+                           Foreground="{DynamicResource Galah.Text.Primary}" />
+                <TextBox x:Name="InputBox" Margin="0,12,0,0" Padding="8,6" Visibility="Collapsed"
+                         Background="{DynamicResource Galah.Input.Background}"
+                         Foreground="{DynamicResource Galah.Text.Primary}"
+                         BorderBrush="{DynamicResource Galah.Input.Border}" />
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,18,0,0">
+                    <!-- 中文界面习惯：动作按钮在左，取消在右（用户规范 2026-11-18） -->
+                    <Button x:Name="OkButton" Content="确定" MinWidth="84" Padding="18,10" Margin="0,0,8,0"
+                            IsDefault="True" Click="Ok_Click" Style="{StaticResource Galah.ButtonPrimary}" />
+                    <Button Content="取消" MinWidth="74" Padding="14,8" IsCancel="True" Click="Cancel_Click" />
+                </StackPanel>
+            </StackPanel>
+        </Grid>
+    </Border>
 </Window>
