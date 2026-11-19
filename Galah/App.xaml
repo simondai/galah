@@ -185,10 +185,17 @@
             </Style.Triggers>
         </Style>
         <Style TargetType="{x:Type Separator}">
+            <!-- Kill every inherited margin/padding from theme-level styles (they made the line
+                 asymmetric inside the popup), then draw a hairline that stretches edge to edge
+                 with symmetric breathing room matching the leaf items' horizontal padding. -->
+            <Setter Property="Margin" Value="0" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Separator">
-                        <Border Height="1" Background="{DynamicResource Galah.Separator}" Margin="6,4" />
+                        <Border Height="1" Background="{DynamicResource Galah.Separator}"
+                                Margin="10,4" HorizontalAlignment="Stretch" />
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
