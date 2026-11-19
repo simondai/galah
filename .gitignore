@@ -1,0 +1,19 @@
+# build outputs
+[Ll]ark/[Bb]in/
+[Ll]ark/[Oo]bj/
+[Ll]ark.Tests/[Bb]in/
+[Ll]ark.Tests/[Oo]bj/
+[Ll]ark.Acceptance/[Bb]in/
+[Ll]ark.Acceptance/[Oo]bj/
+[Bb]in/
+[Oo]bj/
+publish/
+
+# user data lives beside the exe at runtime - never commit it
+LarkData/
+evidence/
+tools/
+
+# IDE
+.vs/
+*.user

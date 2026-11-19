@@ -1,0 +1,40 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Self-drawn light palette (no shipped assets). -->
+    <SolidColorBrush x:Key="Galah.Panel.Background" Color="#FFFFFFFF" />
+    <SolidColorBrush x:Key="Galah.Panel.Border" Color="#FFE0E0E0" />
+    <SolidColorBrush x:Key="Galah.Chrome.Background" Color="#FFF5F5F7" />
+    <SolidColorBrush x:Key="Galah.TabStrip.Background" Color="#FFF5F5F7" />
+    <SolidColorBrush x:Key="Galah.Text.Primary" Color="#FF1D1D1F" />
+    <SolidColorBrush x:Key="Galah.Text.Secondary" Color="#FF7A7A7A" />
+    <SolidColorBrush x:Key="Galah.Accent" Color="#FF0066CC" />
+    <SolidColorBrush x:Key="Galah.Tile.Background" Color="#00000000" />
+    <SolidColorBrush x:Key="Galah.Tile.Hover" Color="#FFF5F5F7" />
+    <SolidColorBrush x:Key="Galah.Tile.Selected" Color="#FFE8F0FE" />
+    <SolidColorBrush x:Key="Galah.Button.Background" Color="#FFFAFAFC" />
+    <SolidColorBrush x:Key="Galah.Button.Border" Color="#FFF0F0F0" />
+    <SolidColorBrush x:Key="Galah.Button.Foreground" Color="#FF333333" />
+    <SolidColorBrush x:Key="Galah.Input.Background" Color="#FFFFFFFF" />
+    <SolidColorBrush x:Key="Galah.Input.Border" Color="#FFE0E0E0" />
+    <SolidColorBrush x:Key="Galah.Toast.Background" Color="#E62B2F36" />
+    <SolidColorBrush x:Key="Galah.Toast.Foreground" Color="#FFFFFFFF" />
+    <SolidColorBrush x:Key="Galah.Banner.Background" Color="#26C0392B" />
+    <SolidColorBrush x:Key="Galah.Banner.Border" Color="#FFC0392B" />
+    <SolidColorBrush x:Key="Galah.Badge.Foreground" Color="#FFFFFFFF" />
+    <SolidColorBrush x:Key="Galah.Badge.Background" Color="#FFC0392B" />
+    <SolidColorBrush x:Key="Galah.Separator" Color="#FFF0F0F0" />
+
+    <!-- DESIGN.md additions -->
+    <SolidColorBrush x:Key="Galah.ActionBlue" Color="#FF0066CC" />
+    <SolidColorBrush x:Key="Galah.OnPrimary" Color="#FFFFFFFF" />
+    <SolidColorBrush x:Key="Galah.Parchment" Color="#FFF5F5F7" />
+    <SolidColorBrush x:Key="Galah.Pearl" Color="#FFFAFAFC" />
+    <SolidColorBrush x:Key="Galah.InkMuted80" Color="#FF333333" />
+    <SolidColorBrush x:Key="Galah.InkMuted48" Color="#FF7A7A7A" />
+    <SolidColorBrush x:Key="Galah.Hairline" Color="#FFE0E0E0" />
+    <SolidColorBrush x:Key="Galah.DividerSoft" Color="#FFF0F0F0" />
+
+    <SolidColorBrush x:Key="Galah.Panel.Translucent" Color="#E8F5F5F7" />
+
+</ResourceDictionary>
