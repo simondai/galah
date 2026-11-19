@@ -22,7 +22,9 @@ jobs:
         run: dotnet build Galah.sln -c Release
 
       - name: Unit tests
-        run: dotnet Galah.Tests/bin/Release/net8.0-windows/Galah.Tests.dll
+        run: |
+          dotnet Galah.Tests/bin/Release/net8.0-windows/Galah.Tests.dll 2>&1 | Tee-Object test-output.log
+          exit $LASTEXITCODE
 
       - name: Publish single-file exe
         run: >
