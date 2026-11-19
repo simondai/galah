@@ -1,19 +1,21 @@
 # build outputs
-[Ll]ark/[Bb]in/
-[Ll]ark/[Oo]bj/
-[Ll]ark.Tests/[Bb]in/
-[Ll]ark.Tests/[Oo]bj/
-[Ll]ark.Acceptance/[Bb]in/
-[Ll]ark.Acceptance/[Oo]bj/
 [Bb]in/
 [Oo]bj/
 publish/
+artifacts/
 
 # user data lives beside the exe at runtime - never commit it
-LarkData/
-evidence/
-tools/
+GalahData/
+
+# probe scratch output
+**/TestResults/
 
 # IDE
 .vs/
+.idea/
 *.user
+*.suo
+
+# OS
+Thumbs.db
+Desktop.ini
