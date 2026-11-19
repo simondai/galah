@@ -94,53 +94,95 @@
                 </Setter.Value>
             </Setter>
         </Style>
-        <!-- Top-level header item (the panel's ☰ chrome menu): a chrome-styled trigger host.
-             The implicit MenuItem style below is leaf-only (no submenu popup parts), so the
-             top-level menu needs its own template that keeps WPF's native submenu behavior. -->
-        <Style x:Key="Galah.MenuTopItem" TargetType="MenuItem">
-            <Setter Property="Foreground" Value="{DynamicResource Galah.Text.Primary}" />
-            <Setter Property="Padding" Value="6,2" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="MenuItem">
-                        <Border x:Name="bg" Background="Transparent" CornerRadius="6" Padding="{TemplateBinding Padding}">
-                            <ContentPresenter ContentSource="Header" VerticalAlignment="Center" />
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsHighlighted" Value="True">
-                                <Setter TargetName="bg" Property="Background" Value="{DynamicResource Galah.Tile.Hover}" />
-                            </Trigger>
-                            <Trigger Property="IsSubmenuOpen" Value="True">
-                                <Setter TargetName="bg" Property="Background" Value="{DynamicResource Galah.Tile.Hover}" />
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-        <!-- Leaf menu items: header + hover highlight only. Items with submenus (MoveToTabMenu)
-             are rare; WPF falls back gracefully because Role=Submenu items also hit this
-             template — their submenu opens as a plain popup. -->
+        <!-- MenuItem templates. WPF's default menu templates read SystemColors (popups stay
+             light in dark mode), so everything is re-skinned through the theme dictionaries.
+             Role decides the template: headers (☰ top-level, "移到其他分类…" nested) need a
+             template that owns the submenu Popup (PART_Popup) or the submenu never opens;
+             leaves get the simple hover template. -->
+        <ControlTemplate x:Key="Galah.MenuItemLeaf" TargetType="MenuItem">
+            <Border x:Name="bg" Background="Transparent" CornerRadius="6" Padding="10,6">
+                <ContentPresenter ContentSource="Header" VerticalAlignment="Center"
+                                  TextBlock.Foreground="{TemplateBinding Foreground}" />
+            </Border>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsHighlighted" Value="True">
+                    <Setter TargetName="bg" Property="Background" Value="{DynamicResource Galah.Tile.Hover}" />
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Foreground" Value="{DynamicResource Galah.Text.Secondary}" />
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+        <ControlTemplate x:Key="Galah.MenuItemHeaderBottom" TargetType="MenuItem">
+            <Grid>
+                <Border x:Name="bg" Background="Transparent" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                    <ContentPresenter ContentSource="Header" VerticalAlignment="Center" />
+                </Border>
+                <Popup x:Name="PART_Popup" Placement="Bottom" PlacementTarget="{Binding RelativeSource={RelativeSource TemplatedParent}}"
+                       IsOpen="{TemplateBinding IsSubmenuOpen}" AllowsTransparency="True" Focusable="False" PopupAnimation="Fade">
+                    <Border Background="{DynamicResource Galah.Popup.Background}"
+                            BorderBrush="{DynamicResource Galah.Panel.Border}" BorderThickness="1"
+                            CornerRadius="10" Padding="6" Margin="8">
+                        <Border.Effect>
+                            <DropShadowEffect BlurRadius="12" ShadowDepth="2" Opacity="0.35" />
+                        </Border.Effect>
+                        <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Cycle" />
+                    </Border>
+                </Popup>
+            </Grid>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsHighlighted" Value="True">
+                    <Setter TargetName="bg" Property="Background" Value="{DynamicResource Galah.Tile.Hover}" />
+                </Trigger>
+                <Trigger Property="IsSubmenuOpen" Value="True">
+                    <Setter TargetName="bg" Property="Background" Value="{DynamicResource Galah.Tile.Hover}" />
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+        <ControlTemplate x:Key="Galah.MenuItemHeaderRight" TargetType="MenuItem">
+            <Grid>
+                <Border x:Name="bg" Background="Transparent" CornerRadius="6" Padding="10,6">
+                    <Grid>
+                        <ContentPresenter ContentSource="Header" VerticalAlignment="Center" />
+                        <TextBlock Text="▸" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                   Foreground="{TemplateBinding Foreground}" FontSize="10" />
+                    </Grid>
+                </Border>
+                <Popup x:Name="PART_Popup" Placement="Right" PlacementTarget="{Binding RelativeSource={RelativeSource TemplatedParent}}"
+                       IsOpen="{TemplateBinding IsSubmenuOpen}" AllowsTransparency="True" Focusable="False" PopupAnimation="Fade">
+                    <Border Background="{DynamicResource Galah.Popup.Background}"
+                            BorderBrush="{DynamicResource Galah.Panel.Border}" BorderThickness="1"
+                            CornerRadius="10" Padding="6" Margin="8">
+                        <Border.Effect>
+                            <DropShadowEffect BlurRadius="12" ShadowDepth="2" Opacity="0.35" />
+                        </Border.Effect>
+                        <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Cycle" />
+                    </Border>
+                </Popup>
+            </Grid>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsHighlighted" Value="True">
+                    <Setter TargetName="bg" Property="Background" Value="{DynamicResource Galah.Tile.Hover}" />
+                </Trigger>
+                <Trigger Property="IsSubmenuOpen" Value="True">
+                    <Setter TargetName="bg" Property="Background" Value="{DynamicResource Galah.Tile.Hover}" />
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Foreground" Value="{DynamicResource Galah.Text.Secondary}" />
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
         <Style TargetType="MenuItem">
             <Setter Property="Foreground" Value="{DynamicResource Galah.Text.Primary}" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="MenuItem">
-                        <Border x:Name="bg" Background="Transparent" CornerRadius="6" Padding="10,6">
-                            <ContentPresenter ContentSource="Header" VerticalAlignment="Center"
-                                              TextBlock.Foreground="{TemplateBinding Foreground}" />
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsHighlighted" Value="True">
-                                <Setter TargetName="bg" Property="Background" Value="{DynamicResource Galah.Tile.Hover}" />
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter Property="Foreground" Value="{DynamicResource Galah.Text.Secondary}" />
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
+            <Setter Property="Template" Value="{StaticResource Galah.MenuItemLeaf}" />
+            <Style.Triggers>
+                <Trigger Property="Role" Value="TopLevelHeader">
+                    <Setter Property="Template" Value="{StaticResource Galah.MenuItemHeaderBottom}" />
+                </Trigger>
+                <Trigger Property="Role" Value="SubmenuHeader">
+                    <Setter Property="Template" Value="{StaticResource Galah.MenuItemHeaderRight}" />
+                </Trigger>
+            </Style.Triggers>
         </Style>
         <Style TargetType="{x:Type Separator}">
             <Setter Property="Template">

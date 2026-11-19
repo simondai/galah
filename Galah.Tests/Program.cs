@@ -57,6 +57,7 @@ internal static class Program
         Run("T20", T20_DesktopShortcut.Run);
         Run("T21", T21_Navigation.Run);
         Run("T22", T22_Favicon.Run);
+        Run("T23", T23_MscIconCacheKey.Run);
 
         Console.WriteLine();
         Console.WriteLine(new string('-', 62));

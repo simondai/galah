@@ -119,7 +119,7 @@
                     </StackPanel>
                     <Menu Grid.Column="1" Background="Transparent" BorderThickness="0" VerticalAlignment="Center"
                           shell:WindowChrome.IsHitTestVisibleInChrome="True">
-                        <MenuItem Header="☰" Style="{StaticResource Galah.MenuTopItem}" Foreground="{DynamicResource Galah.Text.Primary}">
+                        <MenuItem Header="☰" Foreground="{DynamicResource Galah.Text.Primary}">
                             <MenuItem Header="添加快捷方式…" Command="{Binding AddPickerCommand}" />
                             <MenuItem Header="维护与迁移…" Click="Maintenance_Click" />
                             <MenuItem Header="设置…" Command="{Binding ShowSettingsCommand}" />

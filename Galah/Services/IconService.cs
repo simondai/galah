@@ -23,6 +23,9 @@ public static class IconService
 {
     private static AppDataPaths? _paths;
     private static readonly string[] ImageFileExtensions = [".png", ".ico", ".jpg", ".jpeg", ".bmp", ".gif", ".webp"];
+    private const string MscExtension = ".msc";
+    /// <summary>Cap on a shell-handler extraction before falling back to the legacy routes.</summary>
+    private static readonly TimeSpan ShellHandlerTimeout = TimeSpan.FromSeconds(4);
 
     /// <summary>Point the service at a data root (called once during boot; tests use a scratch dir).</summary>
     /// <param name="paths">Data paths of the running instance.</param>
@@ -192,11 +195,108 @@ public static class IconService
         if (index == 0 && IsImageFile(storedSource) && File.Exists(osPath))
             bitmap = DecodeFile(osPath);
 
+        // Modern .msc snap-ins embed PNG-compressed icon resources that ExtractIconExW and
+        // SHGetFileInfoW cannot read (the latter falls back to the gray generic document icon).
+        // The shell icon handler COM object decodes them properly, so it goes first for .msc.
+        if (bitmap is null && IsMscFile(osPath))
+            bitmap = ExtractViaShellHandler(osPath, large);
+
         bitmap ??= ExtractByIndex(osPath, index, large) ?? ExtractShellIcon(osPath, large);
         if (bitmap is null) return null;
 
         CacheToFile(bitmap, storedSource, index, large);
         return bitmap;
+    }
+
+    private static bool IsMscFile(string osPath) =>
+        Path.GetExtension(osPath).Equals(MscExtension, StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Extract an icon through the shell icon handler COM object (CLSID 7A80E4A8-…): IPersistFile
+    /// loads the document, IExtractIconW resolves and rasterizes its real icon. This is the only
+    /// route that understands the PNG-compressed icon resources inside modern .msc snap-ins, which
+    /// ExtractIconExW (0 icons), SHGetFileInfoW (gray fallback) and PrivateExtractIconsW all miss.
+    /// Returns null on any failure — icon work is cosmetic and must never throw.
+    /// </summary>
+    /// <param name="osPath">OS path of the document.</param>
+    /// <param name="large">True for the large (32px nominal) size.</param>
+    private static BitmapSource? ExtractViaShellHandler(string osPath, bool large)
+    {
+        // The handler's IExtractIconW is only reachable from an STA apartment: on MTA threads the
+        // object answers QueryInterface for it with E_NOINTERFACE (verified 0x80004002 vs S_OK on
+        // this machine — powershell.exe hosts are STA, which masked that in console experiments).
+        // Extraction runs inside Task.Run (MTA), so the whole COM conversation happens on a
+        // dedicated STA worker instead; its result is frozen and therefore cross-thread safe.
+        BitmapSource? result = null;
+        using var done = new ManualResetEventSlim(false);
+        var worker = new Thread(() =>
+        {
+            try { result = ExtractViaShellHandlerSta(osPath, large); }
+            catch { result = null; }                 // cosmetic path: no crash, fall back below
+            finally { done.Set(); }
+        })
+        { IsBackground = true };                     // abandoned workers never block shutdown
+        worker.SetApartmentState(ApartmentState.STA);
+        worker.Start();
+        // A stuck shell handler must not stall the panel; on timeout fall back to the legacy routes.
+        return done.Wait(ShellHandlerTimeout) ? result : null;
+    }
+
+    /// <summary>STA-worker body: create the handler, load the document, rasterize its icon.</summary>
+    private static BitmapSource? ExtractViaShellHandlerSta(string osPath, bool large)
+    {
+        object? handler = null;
+        var comInitializedHere = false;
+        try
+        {
+            // Best-effort apartment init; the CLR has usually already made this thread STA, in
+            // which case the call returns S_FALSE (a ref count we balance with CoUninitialize).
+            // A failure HRESULT is ignored — the handler still worked under the CLR's apartment.
+            var hr = NativeMethods.CoInitializeEx(IntPtr.Zero, NativeMethods.CoinitApartmentThreaded);
+            comInitializedHere = hr >= 0;
+
+            if (NativeMethods.CoCreateInstance(in NativeMethods.ShellIconHandlerClsid, IntPtr.Zero,
+                    NativeMethods.ClsctxInprocServer, in NativeMethods.IUnknownIid, out handler) != NativeMethods.SOk
+                || handler is null) return null;
+
+            var persist = (IPersistFile)handler;         // throws InvalidCastException when absent
+            persist.Load(osPath, NativeMethods.StgmRead);
+
+            var extract = (NativeMethods.IExtractIconW)handler;
+            var iconIndex = 0;
+            var iconFlags = 0u;
+            var location = ComBuffer.Read(ComBuffer.MaxPath,
+                p => extract.GetIconLocation(0, p, ComBuffer.MaxPath, out iconIndex, out iconFlags));
+            if (string.IsNullOrWhiteSpace(location)) return null;
+
+            var got = extract.Extract(location, unchecked((uint)iconIndex), out var big, out var small,
+                NativeMethods.IconSizeRequest);
+            if (got != NativeMethods.SOk || (big == IntPtr.Zero && small == IntPtr.Zero)) return null;
+
+            var handle = large ? big : (small != IntPtr.Zero ? small : big);
+            if (handle == IntPtr.Zero) return null;
+            try
+            {
+                return FreezeSafely(Imaging.CreateBitmapSourceFromHIcon(handle, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()));
+            }
+            finally
+            {
+                if (big != IntPtr.Zero) Win32.DestroyIcon(big);
+                if (small != IntPtr.Zero) Win32.DestroyIcon(small);
+            }
+        }
+        catch (Exception)
+        {
+            return null;   // handler missing / load failed / extraction refused: fall back below
+        }
+        finally
+        {
+            if (handler is not null)
+            {
+                try { Marshal.ReleaseComObject(handler); } catch (Exception) { /* cosmetic path */ }
+            }
+            if (comInitializedHere) NativeMethods.CoUninitialize();
+        }
     }
 
     private static BitmapSource? ExtractByIndex(string osPath, int index, bool large)
@@ -347,5 +447,48 @@ public static class IconService
     {
         [DllImport("shell32.dll", CharSet = CharSet.Unicode)]
         public static extern uint ExtractIconExW(string lpszFile, int nIconIndex, out IntPtr phiconLarge, out IntPtr phiconSmall, uint nIcons);
+
+        // ---- shell icon handler COM route (.msc and other handler-hosted icons) ----------------
+
+        /// <summary>CLSID of the shell icon handler (extracticonco) — handles documents via IPersistFile + IExtractIconW.</summary>
+        public static readonly Guid ShellIconHandlerClsid = new("7A80E4A8-8005-11D2-BCF8-00C04F72C717");
+
+        /// <summary>IID_IUnknown — ask CoCreateInstance for the handler's own interface set.</summary>
+        public static readonly Guid IUnknownIid = new("00000000-0000-0000-C000-000000000046");
+
+        public const int ClsctxInprocServer = 0x1;
+        public const int StgmRead = 0x0;
+        public const int SOk = 0x00000000;
+        public const uint CoinitApartmentThreaded = 0x2;
+        /// <summary>nIconSize word pair for IExtractIconW.Extract, verified on this machine to yield the real 32px snap-in icon.</summary>
+        public const uint IconSizeRequest = 0x20 | 0x10;
+
+        [DllImport("ole32.dll")]
+        public static extern int CoInitializeEx(IntPtr reserved, uint coInit);
+
+        [DllImport("ole32.dll")]
+        public static extern void CoUninitialize();
+
+        /// <summary>Create a COM object; a failed activation is an HRESULT to inspect, not a thrown COMException.</summary>
+        [DllImport("ole32.dll", PreserveSig = true)]
+        public static extern int CoCreateInstance(in Guid rclsid, IntPtr pUnkOuter, uint dwClsContext, in Guid riid, [MarshalAs(UnmanagedType.IUnknown)] out object? ppv);
+
+        /// <summary>
+        /// IExtractIconW — the shell icon extraction contract. Vtable order follows the published
+        /// IExtractIcon definition exactly (GetIconLocation then Extract; IUnknown precedes).
+        /// </summary>
+        [ComImport]
+        [Guid("000214FA-0000-0000-C000-000000000046")]
+        [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+        public interface IExtractIconW
+        {
+            /// <summary>Resolve where the icon lives: fills the wide path buffer plus index and GIL_* flags.</summary>
+            [PreserveSig]
+            int GetIconLocation(uint uFlags, IntPtr szIconFile, int cchMax, out int piIndex, out uint pwFlags);
+
+            /// <summary>Rasterize the icon; returns S_FALSE when the caller should use the returned location directly.</summary>
+            [PreserveSig]
+            int Extract([MarshalAs(UnmanagedType.LPWStr)] string pszFile, uint nIconIndex, out IntPtr phiconLarge, out IntPtr phiconSmall, uint nIconSize);
+        }
     }
 }
