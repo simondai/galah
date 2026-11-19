@@ -26,6 +26,14 @@ jobs:
           dotnet Galah.Tests/bin/Release/net8.0-windows/Galah.Tests.dll 2>&1 | Tee-Object test-output.log
           exit $LASTEXITCODE
 
+      - name: Upload test log (always, even on failure)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-output
+          path: test-output.log
+          if-no-files-found: ignore
+
       - name: Publish single-file exe
         run: >
           dotnet publish Galah/Galah.csproj -c Release -r win-x64 --self-contained
