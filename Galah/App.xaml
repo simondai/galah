@@ -94,6 +94,33 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        <!-- Top-level header item (the panel's ☰ chrome menu): a chrome-styled trigger host.
+             The implicit MenuItem style below is leaf-only (no submenu popup parts), so the
+             top-level menu needs its own template that keeps WPF's native submenu behavior. -->
+        <Style x:Key="Galah.MenuTopItem" TargetType="MenuItem">
+            <Setter Property="Foreground" Value="{DynamicResource Galah.Text.Primary}" />
+            <Setter Property="Padding" Value="6,2" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="MenuItem">
+                        <Border x:Name="bg" Background="Transparent" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter ContentSource="Header" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsHighlighted" Value="True">
+                                <Setter TargetName="bg" Property="Background" Value="{DynamicResource Galah.Tile.Hover}" />
+                            </Trigger>
+                            <Trigger Property="IsSubmenuOpen" Value="True">
+                                <Setter TargetName="bg" Property="Background" Value="{DynamicResource Galah.Tile.Hover}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <!-- Leaf menu items: header + hover highlight only. Items with submenus (MoveToTabMenu)
+             are rare; WPF falls back gracefully because Role=Submenu items also hit this
+             template — their submenu opens as a plain popup. -->
         <Style TargetType="MenuItem">
             <Setter Property="Foreground" Value="{DynamicResource Galah.Text.Primary}" />
             <Setter Property="Template">
